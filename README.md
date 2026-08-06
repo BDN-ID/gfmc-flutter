@@ -5,6 +5,13 @@ minicinema mini-program SDK. Embeds streaming, entitlements and Google Play
 top-ups inside your Flutter app's Android target as a self-contained hub,
 without hand-rolling a `MethodChannel` yourself.
 
+**Native SDK version pinned by this plugin:** `com.sltr.gfmc:gfmc-sdk:1.2.6`
+(GfmcSDK `2.3.6`) — set in `android/build.gradle`'s `dependencies` block.
+That's the only place it's declared; check that file directly if this README
+ever drifts out of sync with it. See
+[gfmc-sdk's own README](https://github.com/BDN-ID/gfmc-sdk#changelog) for
+what each native version actually changed before bumping it here.
+
 **Android only for now.** The GfmcSDK team's iOS SDK lives in a separate,
 not-yet-integrated repo — this plugin's `ios/` platform folder doesn't exist
 yet. Calling anything here from an iOS build target will fail at the
@@ -181,3 +188,13 @@ example/                      minimal demo app (run `flutter create .`
                                inside example/ first to regenerate its
                                platform folders — those aren't checked in)
 ```
+
+## Changelog
+
+Full history in [`CHANGELOG.md`](CHANGELOG.md).
+
+- **0.1.0** — initial version. Wraps `gfmc-sdk 1.2.6` (GfmcSDK 2.3.6).
+  `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`, `setTokenRefresher`,
+  and a unified `Stream<GfmcEvent>` for hub lifecycle/errors/purchases/
+  module changes/share requests/SKU selection. Android only — see "Known
+  gaps" above.
