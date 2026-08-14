@@ -41,6 +41,13 @@ class GfmcFlutterPlugin : FlutterPlugin, ActivityAware, GfmcHostApi {
     // into a torn-down engine after detach.
     private var attached = false
 
+    // GfmcSDK.getConfig() exists but is `internal` in the AAR (compile-time
+    // "Cannot access ... it is internal in 'com.sltr.gfmc.GfmcSDK'" against
+    // gfmc-sdk 1.2.6) -- not something a consumer module can call. We track
+    // the last config passed to [init] ourselves instead of reading it back
+    // from the SDK.
+    private var lastConfig: GfmcConfigMessage? = null
+
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = binding.applicationContext
         flutterApi = GfmcFlutterApi(binding.binaryMessenger)
@@ -89,6 +96,7 @@ class GfmcFlutterPlugin : FlutterPlugin, ActivityAware, GfmcHostApi {
         GfmcSDK.setListener(ctx, sdkListener)
         GfmcSDK.setTokenRefresher(tokenRefresher)
         GfmcSDK.setSkuListener(skuListener)
+        lastConfig = config
     }
 
     override fun open(jwt: String) {
@@ -115,16 +123,7 @@ class GfmcFlutterPlugin : FlutterPlugin, ActivityAware, GfmcHostApi {
         )
     }
 
-    override fun getConfig(): GfmcConfigMessage? {
-        val cfg = GfmcSDK.getConfig() ?: return null
-        return GfmcConfigMessage(
-            environment = cfg.environment.toMessageEnv(),
-            locale = cfg.locale,
-            theme = cfg.theme.toMessageTheme(),
-            enableLogging = cfg.enableLogging,
-            connectionTimeoutMs = cfg.connectionTimeout,
-        )
-    }
+    override fun getConfig(): GfmcConfigMessage? = lastConfig
 
     // -- GfmcSDK callbacks -> GfmcFlutterApi (native -> Dart) --------------
 
@@ -179,22 +178,10 @@ private fun GfmcEnvMessage.toSdkEnv(): GfmcSDKEnv = when (this) {
     GfmcEnvMessage.DEV -> GfmcSDKEnv.DEV
 }
 
-private fun GfmcSDKEnv.toMessageEnv(): GfmcEnvMessage = when (this) {
-    GfmcSDKEnv.PRODUCTION -> GfmcEnvMessage.PRODUCTION
-    GfmcSDKEnv.SANDBOX -> GfmcEnvMessage.SANDBOX
-    GfmcSDKEnv.DEV -> GfmcEnvMessage.DEV
-}
-
 private fun GfmcThemeMessage.toSdkTheme(): GfmcSDKTheme = when (this) {
     GfmcThemeMessage.DARK -> GfmcSDKTheme.DARK
     GfmcThemeMessage.LIGHT -> GfmcSDKTheme.LIGHT
     GfmcThemeMessage.AUTO -> GfmcSDKTheme.AUTO
-}
-
-private fun GfmcSDKTheme.toMessageTheme(): GfmcThemeMessage = when (this) {
-    GfmcSDKTheme.DARK -> GfmcThemeMessage.DARK
-    GfmcSDKTheme.LIGHT -> GfmcThemeMessage.LIGHT
-    GfmcSDKTheme.AUTO -> GfmcThemeMessage.AUTO
 }
 
 private fun GfmcSDKError.toMessage(): GfmcErrorMessage = when (this) {
