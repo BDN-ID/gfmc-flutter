@@ -17,19 +17,6 @@ not-yet-integrated repo — this plugin's `ios/` platform folder doesn't exist
 yet. Calling anything here from an iOS build target will fail at the
 `MissingPluginException` level, not silently no-op.
 
-> ⚠️ **This plugin's generated platform-channel glue was hand-written, not
-> produced by running `dart run pigeon`** — no Dart/Flutter SDK was
-> available in the environment that authored it. Before depending on this
-> for anything real:
-> ```
-> dart pub get
-> dart run pigeon --input pigeons/gfmc_api.dart
-> ```
-> then diff `lib/src/messages.g.dart` and
-> `android/src/main/kotlin/com/sltr/gfmc/flutter/Messages.g.kt` against
-> what's committed, and run `flutter analyze` + the example app on a real
-> device. See "Known gaps" below for what to look at first.
-
 ---
 
 ## Install
@@ -41,9 +28,25 @@ Not published to pub.dev — add it as a git dependency:
 dependencies:
   gfmc_flutter:
     git:
-      url: https://github.com/BDN-ID/jessica-sdk-flutter.git
-      ref: main # pin to a tag once this has any, e.g. v0.1.0
+      url: https://github.com/BDN-ID/gfmc-flutter.git
+      ref: v0.1.0
 ```
+
+### Package versioning
+
+This package follows semver (`MAJOR.MINOR.PATCH`), but it's distributed via
+this repo's git tags, not pub.dev — so `pubspec.yaml` can only pin one exact
+`ref`, not a `^0.1.0`-style range:
+
+- **Pin a tag** (`ref: v0.1.0`), not `main`/`master` — a branch ref means your
+  build silently picks up whatever's newest on it, including unreleased
+  work-in-progress commits.
+- **Upgrading is manual.** There's no `pub upgrade` auto-resolving to "latest
+  compatible" the way a pub.dev package works — bump the `ref:` yourself and
+  re-run `flutter pub get`.
+- **Check [`CHANGELOG.md`](CHANGELOG.md) before bumping** — same discipline
+  as bumping the native `gfmc-sdk` coordinate (see "Native SDK version"
+  below). Each tag here corresponds 1:1 with a `CHANGELOG.md` entry.
 
 ### Gradle repository
 
@@ -140,7 +143,7 @@ underlying event/listener callback still exists on the native side for API
 compatibility, but nothing triggers it anymore today. Kept here for the same
 reason.
 
-## Versioning
+## Native SDK version
 
 ```dart
 final version = await GfmcSdk.getVersion();
@@ -174,8 +177,6 @@ what changed before bumping.
   async `GfmcTokenRefresher` path (`setTokenRefresher` + `open`) is wired up
   — which covers the common case (a host backend call to refresh a token is
   itself always async anyway).
-- **Generated Pigeon files are hand-written**, not machine-generated — see
-  the warning at the top of this README.
 
 ## Repo layout
 
@@ -191,10 +192,12 @@ example/                      minimal demo app (run `flutter create .`
 
 ## Changelog
 
-Full history in [`CHANGELOG.md`](CHANGELOG.md).
+Full history in [`CHANGELOG.md`](CHANGELOG.md). Each entry there corresponds
+1:1 with a git tag on this repo (see "Package versioning" above) — pin
+`pubspec.yaml`'s `ref:` to the tag matching the entry you want.
 
-- **0.1.0** — initial version. Wraps `gfmc-sdk 1.2.6` (GfmcSDK 2.3.6).
-  `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`, `setTokenRefresher`,
-  and a unified `Stream<GfmcEvent>` for hub lifecycle/errors/purchases/
-  module changes/share requests/SKU selection. Android only — see "Known
-  gaps" above.
+- **0.1.0** (`v0.1.0`) — initial version. Wraps `gfmc-sdk 1.2.6` (GfmcSDK
+  2.3.6). `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`,
+  `setTokenRefresher`, and a unified `Stream<GfmcEvent>` for hub lifecycle/
+  errors/purchases/module changes/share requests/SKU selection. Android
+  only — see "Known gaps" above.
