@@ -1,0 +1,57 @@
+group 'com.sltr.gfmc.flutter'
+version '0.1.0'
+
+buildscript {
+    ext.kotlin_version = '1.9.24'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.5.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // GfmcSDK's distribution repo — a plain directory tree served over
+        // HTTPS via GitHub Pages, no token needed. See
+        // https://github.com/BDN-ID/gfmc-sdk for what's published there.
+        maven { url = uri('https://raw.githubusercontent.com/BDN-ID/gfmc-sdk/gh-pages/') }
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.sltr.gfmc.flutter'
+
+    // Matches gfmc-sdk's own floor (see jessica-sdk-android/gfmc/build.gradle.kts) —
+    // this plugin can't declare a lower minSdk than the native SDK it wraps.
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 24
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+}
+
+dependencies {
+    // Pin this to whatever's current in jessica-sdk-android's CHANGELOG.md —
+    // bump it deliberately, don't float on a range, so a native-side release
+    // never silently changes this plugin's behavior underneath a host app.
+    implementation 'com.sltr.gfmc:gfmc-sdk:1.2.6'
+}

@@ -1,0 +1,138 @@
+// Pigeon schema — the source of truth for the generated platform-channel
+// glue. This file is NOT the plugin's runtime code; it's input to codegen.
+//
+// Regenerate after any change here:
+//   dart run pigeon --input pigeons/gfmc_api.dart
+//
+// That overwrites:
+//   lib/src/messages.g.dart
+//   android/src/main/kotlin/com/sltr/gfmc/flutter/Messages.g.kt
+//
+// NOTE: this repo's committed copies of those two generated files were
+// hand-written to match Pigeon's expected output (no Dart/Flutter SDK was
+// available in the environment that authored them, so `dart run pigeon`
+// was never actually run against this schema). Run the command above and
+// diff before trusting them for anything beyond a starting point.
+import 'package:pigeon/pigeon.dart';
+
+@ConfigurePigeon(
+  PigeonOptions(
+    dartOut: 'lib/src/messages.g.dart',
+    kotlinOut:
+        'android/src/main/kotlin/com/sltr/gfmc/flutter/Messages.g.kt',
+    kotlinOptions: KotlinOptions(package: 'com.sltr.gfmc.flutter'),
+    dartPackageName: 'gfmc_flutter',
+  ),
+)
+
+// -- Enums ------------------------------------------------------------------
+// Mirror com.sltr.gfmc.GfmcSDKEnv / GfmcSDKTheme / GfmcSDKError / GfmcModule
+// 1:1. Keep these in lockstep with the Android SDK's own enums — if it adds
+// a value, add it here in the same position (Pigeon enums are ordinal-coded
+// on the wire, so appending is safe; reordering or deleting is not).
+
+enum GfmcEnvMessage { production, sandbox, dev }
+
+enum GfmcThemeMessage { dark, light, auto }
+
+enum GfmcErrorMessage {
+  authFailed,
+  networkError,
+  sessionExpired,
+  sdkNotInitialized,
+  webviewUnavailable,
+  webviewOutdated,
+  webviewRendererGone,
+  billingUnavailable,
+  purchaseFailed,
+  verifyFailed,
+}
+
+enum GfmcModuleMessage { cinema, game, shop }
+
+// -- Data classes -------------------------------------------------------
+
+class GfmcConfigMessage {
+  GfmcConfigMessage({
+    this.environment = GfmcEnvMessage.production,
+    this.locale = 'en',
+    this.theme = GfmcThemeMessage.auto,
+    this.enableLogging = false,
+    this.connectionTimeoutMs = 10000,
+  });
+
+  GfmcEnvMessage environment;
+  String locale;
+  GfmcThemeMessage theme;
+  bool enableLogging;
+  int connectionTimeoutMs;
+}
+
+class GfmcVersionMessage {
+  GfmcVersionMessage({
+    required this.name,
+    required this.versionCode,
+    required this.artifactVersion,
+    required this.displayName,
+  });
+
+  /// Internal SDK semantic version, e.g. "2.3.6". NOT what a host app
+  /// should show a partner — see [artifactVersion].
+  String name;
+  int versionCode;
+
+  /// The Maven coordinate this plugin's Android dependency actually pins,
+  /// e.g. "1.2.6" — what GfmcSDK.getArtifactVersion()/GET_APP_VERSION report
+  /// on the native side. This is the number to show or log.
+  String artifactVersion;
+  String displayName;
+}
+
+// -- Host API (Dart calls native) -------------------------------------------
+
+@HostApi()
+abstract class GfmcHostApi {
+  /// Must be called once before [open]. Safe to call again to change config
+  /// (e.g. switching environment) as long as no hub is currently open.
+  void init(GfmcConfigMessage config);
+
+  /// Opens the hub with a minicinema session JWT obtained from your own
+  /// backend — NOT your app's own auth access token. Requires [init] first
+  /// and a token refresher registered on the Dart side (see
+  /// GfmcFlutterApi.refreshToken) if you expect long sessions.
+  void open(String jwt);
+
+  /// Native-side "close" — same effect as the user tapping the capsule's
+  /// close button. No-op if no hub is currently open.
+  void closeMiniApp();
+
+  GfmcVersionMessage getVersion();
+
+  /// Null if [init] hasn't been called yet.
+  GfmcConfigMessage? getConfig();
+}
+
+// -- Flutter API (native calls Dart) -----------------------------------------
+
+@FlutterApi()
+abstract class GfmcFlutterApi {
+  void onHubReady();
+  void onHubClosed();
+  void onError(GfmcErrorMessage code, String message);
+  void onPurchaseCompleted(String sku, String txId);
+  void onPurchaseFailed(String reason);
+  void onModuleChanged(GfmcModuleMessage module);
+  void onShareRequested(String url, String title);
+
+  /// Informational only — does not gate the Google Play billing flow, which
+  /// runs natively regardless of what this returns.
+  void onSkuSelected(String sku);
+
+  /// Native asks Dart for a fresh minicinema JWT when the current one
+  /// expires. Implement this to call your own backend and return the new
+  /// token; throw (or let the Future fail) to signal a refresh failure —
+  /// the native side maps that to the same "refresh failed" outcome as
+  /// GfmcTokenRefresher.fail(reason) on the Android side.
+  @async
+  String refreshToken();
+}
