@@ -1,5 +1,7 @@
 # gfmc_flutter
 
+*Read this in other languages: [Bahasa Indonesia](README.id.md).*
+
 Flutter plugin wrapping [GfmcSDK](https://github.com/BDN-ID/gfmc-sdk) — the
 minicinema mini-program SDK. Embeds streaming, entitlements and Google Play
 top-ups inside your Flutter app's Android target as a self-contained hub,
@@ -138,10 +140,11 @@ per event type.
 | `GfmcSkuSelectedEvent` | (SKU listener) | web asked to buy a SKU (informational) |
 
 `GfmcShareRequestedEvent`: the native capsule menu's "Share" button was
-**removed** in GfmcSDK 2.3.6 (see jessica-sdk-android's CHANGELOG.md) — the
-underlying event/listener callback still exists on the native side for API
-compatibility, but nothing triggers it anymore today. Kept here for the same
-reason.
+**removed** in GfmcSDK 2.3.6 (see the `1.2.6` row in
+[gfmc-sdk's version table](https://github.com/BDN-ID/gfmc-sdk#versioning)) —
+the underlying event/listener callback still exists on the native side for
+API compatibility, but nothing triggers it anymore today. Kept here for the
+same reason.
 
 ## Native SDK version
 
