@@ -32,6 +32,22 @@ dependencies:
       ref: v0.1.0
 ```
 
+### Package versioning
+
+This package follows semver (`MAJOR.MINOR.PATCH`), but it's distributed via
+this repo's git tags, not pub.dev — so `pubspec.yaml` can only pin one exact
+`ref`, not a `^0.1.0`-style range:
+
+- **Pin a tag** (`ref: v0.1.0`), not `main`/`master` — a branch ref means your
+  build silently picks up whatever's newest on it, including unreleased
+  work-in-progress commits.
+- **Upgrading is manual.** There's no `pub upgrade` auto-resolving to "latest
+  compatible" the way a pub.dev package works — bump the `ref:` yourself and
+  re-run `flutter pub get`.
+- **Check [`CHANGELOG.md`](CHANGELOG.md) before bumping** — same discipline
+  as bumping the native `gfmc-sdk` coordinate (see "Native SDK version"
+  below). Each tag here corresponds 1:1 with a `CHANGELOG.md` entry.
+
 ### Gradle repository
 
 GfmcSDK's Android artifact is distributed from a token-free static Maven
@@ -127,7 +143,7 @@ underlying event/listener callback still exists on the native side for API
 compatibility, but nothing triggers it anymore today. Kept here for the same
 reason.
 
-## Versioning
+## Native SDK version
 
 ```dart
 final version = await GfmcSdk.getVersion();
@@ -161,6 +177,7 @@ what changed before bumping.
   async `GfmcTokenRefresher` path (`setTokenRefresher` + `open`) is wired up
   — which covers the common case (a host backend call to refresh a token is
   itself always async anyway).
+
 ## Repo layout
 
 ```
@@ -175,10 +192,12 @@ example/                      minimal demo app (run `flutter create .`
 
 ## Changelog
 
-Full history in [`CHANGELOG.md`](CHANGELOG.md).
+Full history in [`CHANGELOG.md`](CHANGELOG.md). Each entry there corresponds
+1:1 with a git tag on this repo (see "Package versioning" above) — pin
+`pubspec.yaml`'s `ref:` to the tag matching the entry you want.
 
-- **0.1.0** — initial version. Wraps `gfmc-sdk 1.2.6` (GfmcSDK 2.3.6).
-  `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`, `setTokenRefresher`,
-  and a unified `Stream<GfmcEvent>` for hub lifecycle/errors/purchases/
-  module changes/share requests/SKU selection. Android only — see "Known
-  gaps" above.
+- **0.1.0** (`v0.1.0`) — initial version. Wraps `gfmc-sdk 1.2.6` (GfmcSDK
+  2.3.6). `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`,
+  `setTokenRefresher`, and a unified `Stream<GfmcEvent>` for hub lifecycle/
+  errors/purchases/module changes/share requests/SKU selection. Android
+  only — see "Known gaps" above.
