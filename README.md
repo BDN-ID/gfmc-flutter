@@ -2,22 +2,21 @@
 
 *Read this in other languages: [Bahasa Indonesia](README.id.md).*
 
-Flutter plugin wrapping [GfmcSDK](https://github.com/BDN-ID/gfmc-sdk) — the
-minicinema mini-program SDK. Embeds streaming, entitlements and Google Play
-top-ups inside your Flutter app's Android target as a self-contained hub,
-without hand-rolling a `MethodChannel` yourself.
+Flutter plugin wrapping GfmcSDK — the minicinema mini-program SDK. Embeds
+streaming, entitlements and top-ups inside your Flutter app's Android and
+iOS targets as a self-contained hub, without hand-rolling a `MethodChannel`
+yourself.
 
-**Native SDK version pinned by this plugin:** `com.sltr.gfmc:gfmc-sdk:1.2.6`
-(GfmcSDK `2.3.6`) — set in `android/build.gradle`'s `dependencies` block.
-That's the only place it's declared; check that file directly if this README
-ever drifts out of sync with it. See
-[gfmc-sdk's own README](https://github.com/BDN-ID/gfmc-sdk#changelog) for
-what each native version actually changed before bumping it here.
+**Native SDK versions pinned by this plugin:**
 
-**Android only for now.** The GfmcSDK team's iOS SDK lives in a separate,
-not-yet-integrated repo — this plugin's `ios/` platform folder doesn't exist
-yet. Calling anything here from an iOS build target will fail at the
-`MissingPluginException` level, not silently no-op.
+| Platform | Native package | Version | Declared in |
+|---|---|---|---|
+| Android | [`gfmc-sdk`](https://github.com/BDN-ID/gfmc-sdk) `com.sltr.gfmc:gfmc-sdk:1.2.6` | GfmcSDK `2.3.6` | `android/build.gradle`'s `dependencies` block |
+| iOS | [`gfmc-ios`](https://github.com/BDN-ID/gfmc-ios) `JessicaSDK.xcframework` | `1.14.0` | `ios/gfmc_flutter.podspec`'s `jessica_sdk_version`/`jessica_sdk_sha256` |
+
+Those files are the only places each is declared; check them directly if
+this README ever drifts out of sync. See each native repo's own README for
+what a version bump actually changed before bumping it here.
 
 ---
 
@@ -83,6 +82,24 @@ costs nothing and removes the ambiguity.
 Nothing to add — `INTERNET`, `ACCESS_NETWORK_STATE`,
 `com.android.vending.BILLING`, and the hub's own Activity/services merge in
 automatically from the `gfmc-sdk` AAR, same as for a native Android host.
+
+### iOS Podfile / minimum target
+
+Nothing to add to your `Podfile` — `pod install` picks up this plugin's own
+podspec automatically. Two things worth knowing:
+
+- **`JessicaSDK.xcframework` is fetched at `pod install` time**, not
+  committed to this repo. `ios/gfmc_flutter.podspec`'s `prepare_command`
+  downloads the exact release tagged in
+  [gfmc-ios](https://github.com/BDN-ID/gfmc-ios), verifies its SHA-256
+  against the checksum pinned alongside it, and vendors it in. A first
+  `pod install` after adding this plugin therefore needs network access to
+  `github.com`; a checksum mismatch fails the build loudly instead of
+  vendoring something unverified.
+- **Minimum deployment target is iOS 15** (JessicaSDK's own floor) — this
+  plugin's podspec sets `s.platform = :ios, '15.0'`, so your app's own
+  `ios/Podfile` needs `platform :ios, '15.0'` (or higher) too, or CocoaPods
+  will fail to resolve.
 
 ---
 
@@ -150,29 +167,32 @@ same reason.
 
 ```dart
 final version = await GfmcSdk.getVersion();
-print(version.artifactVersion); // "1.2.6" — the Maven coordinate, what to log/show
-print(version.name);            // "2.3.6" — internal SDK version, not partner-facing
+print(version.artifactVersion); // Android: "1.2.6" Maven coordinate / iOS: "1.14.0" XCFramework release — what to log/show
+print(version.name);            // internal SDK version, not partner-facing (differs per platform, same field)
 ```
 
-Bump `android/build.gradle`'s `com.sltr.gfmc:gfmc-sdk` dependency
-deliberately with each `jessica-sdk-android` release you want to pick up —
-it's pinned, not a floating range, so a native-side release never silently
-changes this plugin's behavior underneath a host app. Check
-[gfmc-sdk's CHANGELOG](https://github.com/BDN-ID/gfmc-sdk#changelog) for
-what changed before bumping.
+Bump the native dependency deliberately with each native SDK release you
+want to pick up — on both platforms it's pinned, not a floating range, so a
+native-side release never silently changes this plugin's behavior
+underneath a host app:
+
+- Android: `android/build.gradle`'s `com.sltr.gfmc:gfmc-sdk` coordinate —
+  see [gfmc-sdk's CHANGELOG](https://github.com/BDN-ID/gfmc-sdk#changelog).
+- iOS: `ios/gfmc_flutter.podspec`'s `jessica_sdk_version`/
+  `jessica_sdk_sha256` (take the checksum from the matching tag's own
+  `Package.swift`, not from anywhere else) — see
+  [gfmc-ios's releases](https://github.com/BDN-ID/gfmc-ios/releases).
 
 ---
 
 ## Known gaps
 
-- **iOS is not implemented.** No `ios/` folder exists. Needs the iOS
-  GfmcSDK's actual API surface before it can be built — this repo doesn't
-  have visibility into that SDK.
-- **`closeMiniApp()` is a no-op today.** The native Android SDK doesn't
+- **`closeMiniApp()` is a no-op on Android.** The native Android SDK doesn't
   expose a host-initiated "close the currently open hub" call — closing is
   driven from inside the hub itself (capsule button, back press). Filed as
-  a gap, not silently hidden — see `GfmcFlutterPlugin.closeMiniApp()`'s
-  comment.
+  a gap, not silently hidden — see `GfmcFlutterPlugin.kt`'s comment. **On
+  iOS it does work** — `JessicaSDK.open()` hands back the presented
+  `JessicaHubViewController`, which this plugin dismisses.
 - **`GfmcTokenProvider` (the synchronous refresh variant /
   `openWithTokenProvider` on Android) has no Flutter equivalent.** Platform
   channels are inherently async; forcing a synchronous native→Dart callback
@@ -180,6 +200,17 @@ what changed before bumping.
   async `GfmcTokenRefresher` path (`setTokenRefresher` + `open`) is wired up
   — which covers the common case (a host backend call to refresh a token is
   itself always async anyway).
+- **A handful of iOS-only `JessicaSDKConfig` knobs aren't exposed through
+  `GfmcConfig` yet** — `isScreenCaptureProtected` (defaults to JessicaSDK's
+  own default, `true`), `hubURLOverride`, `additionalAllowedHosts`,
+  `isWebInspectionEnabled`. None have an Android counterpart today; add them
+  to `pigeons/gfmc_api.dart`'s `GfmcConfigMessage` if a host app needs one.
+- **iOS's hand-written `ios/Classes/Messages.g.swift` and
+  `ios/Classes/GfmcFlutterPlugin.swift` haven't been built against a real
+  Xcode toolchain** (no macOS/Xcode in the environment that authored them)
+  — same caveat as the Android side's generated file, see
+  `pigeons/gfmc_api.dart`'s header comment. Run `pod install` + build in
+  Xcode and fix up any compile errors before shipping.
 
 ## Repo layout
 
@@ -188,6 +219,7 @@ pigeons/gfmc_api.dart         Pigeon schema — the actual source of truth
 lib/gfmc_flutter.dart         public API (barrel export)
 lib/src/                      public API implementation + generated glue
 android/                      the plugin's Android library module
+ios/                          the plugin's iOS library module (podspec + Classes/)
 example/                      minimal demo app (run `flutter create .`
                                inside example/ first to regenerate its
                                platform folders — those aren't checked in)
@@ -199,8 +231,12 @@ Full history in [`CHANGELOG.md`](CHANGELOG.md). Each entry there corresponds
 1:1 with a git tag on this repo (see "Package versioning" above) — pin
 `pubspec.yaml`'s `ref:` to the tag matching the entry you want.
 
+- **0.2.0** (`v0.2.0`) — adds iOS, wrapping `gfmc-ios`
+  (`JessicaSDK.xcframework`) `1.14.0`. Same Dart API as 0.1.0 now works on
+  both platforms; see "Known gaps" above for the handful of things that
+  still differ between them.
 - **0.1.0** (`v0.1.0`) — initial version. Wraps `gfmc-sdk 1.2.6` (GfmcSDK
   2.3.6). `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`,
   `setTokenRefresher`, and a unified `Stream<GfmcEvent>` for hub lifecycle/
   errors/purchases/module changes/share requests/SKU selection. Android
-  only — see "Known gaps" above.
+  only.

@@ -2,22 +2,20 @@
 
 *Read this in other languages: [English](README.md).*
 
-Plugin Flutter pembungkus [GfmcSDK](https://github.com/BDN-ID/gfmc-sdk) — SDK
-mini-program minicinema. Menanamkan streaming, entitlement, dan top-up Google
-Play ke dalam target Android aplikasi Flutter-mu sebagai hub mandiri, tanpa
-perlu bikin `MethodChannel` sendiri.
+Plugin Flutter pembungkus GfmcSDK — SDK mini-program minicinema. Menanamkan
+streaming, entitlement, dan top-up ke dalam target Android dan iOS aplikasi
+Flutter-mu sebagai hub mandiri, tanpa perlu bikin `MethodChannel` sendiri.
 
-**Versi native SDK yang dipin plugin ini:** `com.sltr.gfmc:gfmc-sdk:1.2.6`
-(GfmcSDK `2.3.6`) — diset di blok `dependencies` pada `android/build.gradle`.
-Itu satu-satunya tempat versi ini dideklarasikan; cek file itu langsung kalau
-README ini pernah drift gak sinkron dengannya. Lihat
-[README gfmc-sdk sendiri](https://github.com/BDN-ID/gfmc-sdk#changelog) buat
-tau apa yang berubah di tiap versi native sebelum bump versi di sini.
+**Versi native SDK yang dipin plugin ini:**
 
-**Android saja untuk sekarang.** SDK iOS dari tim GfmcSDK ada di repo
-terpisah yang belum terintegrasi — folder platform `ios/` plugin ini belum
-ada. Manggil apa pun dari sini di target build iOS akan gagal di level
-`MissingPluginException`, bukan diam-diam no-op.
+| Platform | Package native | Versi | Dideklarasikan di |
+|---|---|---|---|
+| Android | [`gfmc-sdk`](https://github.com/BDN-ID/gfmc-sdk) `com.sltr.gfmc:gfmc-sdk:1.2.6` | GfmcSDK `2.3.6` | blok `dependencies` di `android/build.gradle` |
+| iOS | [`gfmc-ios`](https://github.com/BDN-ID/gfmc-ios) `JessicaSDK.xcframework` | `1.14.0` | `jessica_sdk_version`/`jessica_sdk_sha256` di `ios/gfmc_flutter.podspec` |
+
+File-file itu satu-satunya tempat masing-masing dideklarasikan; cek langsung
+kalau README ini pernah drift gak sinkron. Lihat README masing-masing repo
+native buat tau apa yang berubah di tiap versi sebelum bump versi di sini.
 
 ---
 
@@ -85,6 +83,24 @@ Gak ada yang perlu ditambah — `INTERNET`, `ACCESS_NETWORK_STATE`,
 `com.android.vending.BILLING`, dan Activity/service milik hub otomatis
 merge dari AAR `gfmc-sdk`, sama seperti untuk host Android native.
 
+### Podfile / target minimum iOS
+
+Gak ada yang perlu ditambah ke `Podfile`-mu — `pod install` otomatis pakai
+podspec plugin ini. Dua hal yang perlu diketahui:
+
+- **`JessicaSDK.xcframework` diambil saat `pod install`**, bukan di-commit
+  ke repo ini. `prepare_command` di `ios/gfmc_flutter.podspec` mengunduh
+  rilis persis yang di-tag di
+  [gfmc-ios](https://github.com/BDN-ID/gfmc-ios), verifikasi SHA-256-nya
+  terhadap checksum yang dipin di sebelahnya, baru vendor masuk. `pod
+  install` pertama setelah nambah plugin ini butuh akses jaringan ke
+  `github.com`; kalau checksum-nya gak cocok, build gagal dengan jelas
+  ketimbang vendor sesuatu yang gak terverifikasi.
+- **Target deployment minimum iOS 15** (floor bawaan JessicaSDK sendiri) —
+  podspec plugin ini set `s.platform = :ios, '15.0'`, jadi `ios/Podfile`
+  aplikasimu juga butuh `platform :ios, '15.0'` (atau lebih tinggi), kalau
+  enggak CocoaPods bakal gagal resolve.
+
 ---
 
 ## Quick start
@@ -151,29 +167,33 @@ dengan alasan yang sama.
 
 ```dart
 final version = await GfmcSdk.getVersion();
-print(version.artifactVersion); // "1.2.6" — koordinat Maven, yang dicatat/ditampilkan
-print(version.name);            // "2.3.6" — versi internal SDK, bukan untuk partner
+print(version.artifactVersion); // Android: "1.2.6" koordinat Maven / iOS: "1.14.0" rilis XCFramework — yang dicatat/ditampilkan
+print(version.name);            // versi internal SDK, bukan untuk partner (beda per platform, field sama)
 ```
 
-Bump dependency `com.sltr.gfmc:gfmc-sdk` di `android/build.gradle` secara
-sengaja tiap kali mau ambil rilis `jessica-sdk-android` baru — itu pinned,
-bukan range mengambang, jadi rilis di sisi native gak pernah diam-diam
-mengubah perilaku plugin ini di bawah aplikasi host. Cek
-[CHANGELOG gfmc-sdk](https://github.com/BDN-ID/gfmc-sdk#changelog) buat tau
-apa yang berubah sebelum bump.
+Bump dependency native secara sengaja tiap kali mau ambil rilis SDK native
+baru — di kedua platform itu pinned, bukan range mengambang, jadi rilis di
+sisi native gak pernah diam-diam mengubah perilaku plugin ini di bawah
+aplikasi host:
+
+- Android: koordinat `com.sltr.gfmc:gfmc-sdk` di `android/build.gradle` —
+  lihat [CHANGELOG gfmc-sdk](https://github.com/BDN-ID/gfmc-sdk#changelog).
+- iOS: `jessica_sdk_version`/`jessica_sdk_sha256` di
+  `ios/gfmc_flutter.podspec` (ambil checksum dari `Package.swift` di tag
+  yang sesuai, jangan dari tempat lain) — lihat
+  [rilis gfmc-ios](https://github.com/BDN-ID/gfmc-ios/releases).
 
 ---
 
 ## Known gaps (celah yang diketahui)
 
-- **iOS belum diimplementasikan.** Folder `ios/` belum ada. Butuh API
-  surface SDK iOS yang sebenarnya dulu sebelum bisa dibangun — repo ini
-  gak punya visibilitas ke SDK itu.
-- **`closeMiniApp()` masih no-op hari ini.** SDK Android native gak
+- **`closeMiniApp()` masih no-op di Android.** SDK Android native gak
   expose panggilan "tutup hub yang sedang terbuka" yang dipicu dari host
   — penutupan didorong dari dalam hub itu sendiri (tombol capsule, tombol
   back). Dicatat sebagai celah, bukan disembunyikan — lihat komentar
-  `GfmcFlutterPlugin.closeMiniApp()`.
+  `GfmcFlutterPlugin.kt`. **Di iOS ini beneran jalan** — `JessicaSDK.open()`
+  ngembaliin `JessicaHubViewController` yang lagi ditampilkan, dan plugin
+  ini yang dismiss.
 - **`GfmcTokenProvider`** (varian refresh sinkron / `openWithTokenProvider`
   di Android) **gak punya padanan di Flutter.** Platform channel itu
   inherently async; memaksakan callback sinkron native→Dart lintas batas
@@ -181,6 +201,18 @@ apa yang berubah sebelum bump.
   `GfmcTokenRefresher` (`setTokenRefresher` + `open`) yang tersambung —
   yang sudah mencakup kasus umum (panggilan ke backend host buat refresh
   token itu sendiri selalu async juga).
+- **Beberapa opsi `JessicaSDKConfig` khusus iOS belum di-expose lewat
+  `GfmcConfig`** — `isScreenCaptureProtected` (pakai default JessicaSDK
+  sendiri, `true`), `hubURLOverride`, `additionalAllowedHosts`,
+  `isWebInspectionEnabled`. Gak ada satu pun yang punya padanan di Android
+  hari ini; tambahkan ke `GfmcConfigMessage` di `pigeons/gfmc_api.dart` kalau
+  ada aplikasi host yang butuh salah satunya.
+- **`ios/Classes/Messages.g.swift` dan `ios/Classes/GfmcFlutterPlugin.swift`
+  ditulis tangan dan belum pernah dibuild di toolchain Xcode beneran**
+  (gak ada macOS/Xcode di environment yang nulis ini) — catatan yang sama
+  kayak file hasil generate di sisi Android, lihat komentar header
+  `pigeons/gfmc_api.dart`. Jalankan `pod install` + build di Xcode dan
+  perbaiki error compile apa pun sebelum dipakai produksi.
 
 ## Struktur repo
 
@@ -189,6 +221,7 @@ pigeons/gfmc_api.dart         Skema Pigeon — sumber kebenaran sebenarnya
 lib/gfmc_flutter.dart         API publik (barrel export)
 lib/src/                      implementasi API publik + glue hasil generate
 android/                      modul library Android plugin ini
+ios/                          modul library iOS plugin ini (podspec + Classes/)
 example/                      aplikasi demo minimal (jalankan `flutter create .`
                                di dalam example/ dulu buat regenerate folder
                                platform-nya — itu gak di-commit)
@@ -201,8 +234,12 @@ berkorespondensi 1:1 dengan satu git tag di repo ini (lihat "Versioning
 package" di atas) — pin `ref:` di `pubspec.yaml` ke tag yang sesuai dengan
 entry yang kamu mau.
 
+- **0.2.0** (`v0.2.0`) — nambah iOS, membungkus `gfmc-ios`
+  (`JessicaSDK.xcframework`) `1.14.0`. API Dart-nya sama kayak 0.1.0,
+  sekarang jalan di kedua platform; lihat "Known gaps" di atas buat beberapa
+  hal yang masih beda antara keduanya.
 - **0.1.0** (`v0.1.0`) — versi awal. Membungkus `gfmc-sdk 1.2.6` (GfmcSDK
   2.3.6). `GfmcSdk.init`/`.open`/`.getVersion`/`.getConfig`,
   `setTokenRefresher`, dan `Stream<GfmcEvent>` terpadu untuk lifecycle
   hub/error/purchase/perubahan module/permintaan share/pemilihan SKU.
-  Android saja — lihat "Known gaps" di atas.
+  Android saja.

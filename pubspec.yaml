@@ -1,8 +1,8 @@
 name: gfmc_flutter
 description: >
   Flutter plugin for GfmcSDK — embeds the minicinema mini-program (streaming,
-  entitlements, Google Play top-ups) inside a Flutter app's Android target.
-version: 0.1.0
+  entitlements, top-ups) inside a Flutter app's Android and iOS targets.
+version: 0.2.0
 homepage: https://github.com/BDN-ID/gfmc-flutter
 publish_to: none # Distributed via this public repo (see README) — not on pub.dev.
 
@@ -27,4 +27,6 @@ flutter:
     platforms:
       android:
         package: com.sltr.gfmc.flutter
+        pluginClass: GfmcFlutterPlugin
+      ios:
         pluginClass: GfmcFlutterPlugin
