@@ -19,13 +19,5 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
 
-# Dev convenience only — makes this example build against the plugin's
-# working tree in this monorepo instead of fetching the git ref above.
-# Delete this override (or run `flutter pub get` in a checkout that lacks
-# it) to test exactly what a real consumer gets from the public repo.
-dependency_overrides:
-  gfmc_flutter:
-    path: ../
-
 flutter:
   uses-material-design: true

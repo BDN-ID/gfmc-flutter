@@ -3,8 +3,8 @@ description: >
   Flutter plugin for GfmcSDK — embeds the minicinema mini-program (streaming,
   entitlements, top-ups) inside a Flutter app's Android and iOS targets.
 version: 0.2.0
-homepage: https://github.com/BDN-ID/jessica-sdk-flutter
-publish_to: none # Distributed privately (see README) — not published to pub.dev.
+homepage: https://github.com/BDN-ID/gfmc-flutter
+publish_to: none # Distributed via this public repo (see README) — not on pub.dev.
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
