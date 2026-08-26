@@ -7,8 +7,9 @@
 // That overwrites:
 //   lib/src/messages.g.dart
 //   android/src/main/kotlin/com/sltr/gfmc/flutter/Messages.g.kt
+//   ios/Classes/Messages.g.swift
 //
-// NOTE: this repo's committed copies of those two generated files were
+// NOTE: this repo's committed copies of those three generated files were
 // hand-written to match Pigeon's expected output (no Dart/Flutter SDK was
 // available in the environment that authored them, so `dart run pigeon`
 // was never actually run against this schema). Run the command above and
@@ -21,6 +22,7 @@ import 'package:pigeon/pigeon.dart';
     kotlinOut:
         'android/src/main/kotlin/com/sltr/gfmc/flutter/Messages.g.kt',
     kotlinOptions: KotlinOptions(package: 'com.sltr.gfmc.flutter'),
+    swiftOut: 'ios/Classes/Messages.g.swift',
     dartPackageName: 'gfmc_flutter',
   ),
 )
@@ -30,6 +32,11 @@ import 'package:pigeon/pigeon.dart';
 // 1:1. Keep these in lockstep with the Android SDK's own enums — if it adds
 // a value, add it here in the same position (Pigeon enums are ordinal-coded
 // on the wire, so appending is safe; reordering or deleting is not).
+//
+// GfmcErrorMessage is a superset of iOS's JessicaSDKError (JessicaSDK
+// 1.14.0 has no webviewOutdated/webviewRendererGone case — WKWebView update
+// checks are an Android-only concern there) — ios/Classes/GfmcFlutterPlugin
+// .swift's mapper only ever produces the 8 values that exist on both sides.
 
 enum GfmcEnvMessage { production, sandbox, dev }
 
