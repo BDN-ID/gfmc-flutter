@@ -18,6 +18,24 @@ android {
         ...
 ```
 
+**Also move `MainActivity.kt`.** Changing `namespace`/`applicationId` alone
+does NOT move the actual Kotlin source — it still compiles under whatever
+package its `package` statement declares, so the manifest's `.MainActivity`
+resolves to `<new applicationId>.MainActivity` while the real class sits
+under the old package, and the app crashes on launch with
+`ClassNotFoundException`. Move the file and fix its `package` line to
+match:
+
+```sh
+# from example/
+mkdir -p android/app/src/main/kotlin/id/bdn/jessica/flutter/dummyhost
+# move MainActivity.kt there, update its `package id.bdn.jessica.flutter.dummyhost` line,
+# then delete the old now-empty package directory tree.
+```
+
+Confirmed by actually installing and launching on a physical device
+(V2111) — this crashed before the move, ran clean after.
+
 In `example/android/app/src/main/AndroidManifest.xml`, `<application
 android:label="...">` — set to whatever the Play listing's app name should
 be (currently "GFMC Dummy Host").
