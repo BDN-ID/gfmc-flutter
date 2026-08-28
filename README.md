@@ -233,6 +233,11 @@ example/                      minimal demo app (run `flutter create .`
                                platform folders — those aren't checked in)
 ```
 
+Preparing `example/` for a real Play Store upload (signing, applicationId,
+Windows-specific build workarounds) is documented separately in
+[`PLAYSTORE.md`](PLAYSTORE.md) rather than here, since it only applies to
+that gitignored, regenerable app shell.
+
 ## Changelog
 
 Full history in [`CHANGELOG.md`](CHANGELOG.md). Each entry there corresponds
