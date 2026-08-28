@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.1
+
+Docs-only patch — no plugin code changes.
+
+- README.md/README.id.md: lead with the pub.dev install
+  (`gfmc_flutter: ^0.2.0` / `flutter pub add gfmc_flutter`) now that this
+  package is actually published there; keep the git `ref:` install as an
+  alternative. Add a pub.dev version badge.
+- Add `PLAYSTORE.md`: how to prepare `example/` for a real Play Store
+  upload (applicationId, release signing, Windows-path-with-spaces build
+  workarounds, and the `MainActivity.kt` package-move gotcha when changing
+  `applicationId`).
+- `example/`: depend on `gfmc_flutter` via pub.dev instead of a git `ref:`,
+  demonstrating the normal consumer install path.
+
 ## 0.2.0
 
 Adds iOS, wrapping [`gfmc-ios`](https://github.com/BDN-ID/gfmc-ios)
