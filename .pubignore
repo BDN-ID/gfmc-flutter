@@ -1,0 +1,48 @@
+# dart pub publish uses THIS file INSTEAD OF .gitignore once it exists (not
+# merged with it) -- so everything .gitignore excludes has to be repeated
+# here too, or it gets swept into the published archive. Keep this in sync
+# with .gitignore's patterns.
+
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+pubspec.lock
+
+*.iml
+*.ipr
+*.iws
+.idea/
+
+.DS_Store
+
+# Android
+android/.gradle/
+android/local.properties
+android/.cxx/
+*.jks
+!android/*.jks
+
+# Example app platform folders — regenerate with `flutter create .`
+# inside example/ rather than shipping Flutter/Gradle/Xcode scaffolding
+# that drifts out of date on every Flutter release, and (for android/)
+# contains a local release keystore + key.properties that must never be
+# published. See PLAYSTORE.md.
+example/android/
+example/ios/
+example/build/
+example/.dart_tool/
+
+# Old test-flow screenshots taken before example/lib/main.dart's hardcoded
+# credentials were removed — some still show them on-screen. Never publish
+# these to pub.dev (unlike git, a published package version can't really be
+# taken back). See git history if you need the demo flow's screenshots for
+# something internal.
+example/screen.png
+example/screen2.png
+example/screen3.png
+example/screen4.png
+example/screen5.png
+example/screen6.png
+example/screen7.png
