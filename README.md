@@ -1,5 +1,7 @@
 # gfmc_flutter
 
+[![pub package](https://img.shields.io/pub/v/gfmc_flutter.svg)](https://pub.dev/packages/gfmc_flutter)
+
 *Read this in other languages: [Bahasa Indonesia](README.id.md).*
 
 Flutter plugin wrapping GfmcSDK — the minicinema mini-program SDK. Embeds
@@ -22,7 +24,22 @@ what a version bump actually changed before bumping it here.
 
 ## Install
 
-Not published to pub.dev — add it as a git dependency:
+Published on pub.dev — the normal way:
+
+```yaml
+# pubspec.yaml
+dependencies:
+  gfmc_flutter: ^0.2.0
+```
+
+or:
+
+```sh
+flutter pub add gfmc_flutter
+```
+
+Prefer to pin an exact git tag instead (e.g. to track `main` during
+development, or to bypass pub.dev entirely)? Same repo, either way:
 
 ```yaml
 # pubspec.yaml
@@ -30,24 +47,26 @@ dependencies:
   gfmc_flutter:
     git:
       url: https://github.com/BDN-ID/gfmc-flutter.git
-      ref: v0.1.0
+      ref: v0.2.0
 ```
 
 ### Package versioning
 
-This package follows semver (`MAJOR.MINOR.PATCH`), but it's distributed via
-this repo's git tags, not pub.dev — so `pubspec.yaml` can only pin one exact
-`ref`, not a `^0.1.0`-style range:
+Follows semver (`MAJOR.MINOR.PATCH`). On pub.dev, a `^0.2.0`-style
+constraint resolves and upgrades the normal way (`flutter pub upgrade`).
+If you're pinning a git `ref:` instead:
 
-- **Pin a tag** (`ref: v0.1.0`), not `main`/`master` — a branch ref means your
+- **Pin a tag** (`ref: v0.2.0`), not `main`/`master` — a branch ref means your
   build silently picks up whatever's newest on it, including unreleased
   work-in-progress commits.
 - **Upgrading is manual.** There's no `pub upgrade` auto-resolving to "latest
-  compatible" the way a pub.dev package works — bump the `ref:` yourself and
-  re-run `flutter pub get`.
-- **Check [`CHANGELOG.md`](CHANGELOG.md) before bumping** — same discipline
-  as bumping the native `gfmc-sdk` coordinate (see "Native SDK version"
-  below). Each tag here corresponds 1:1 with a `CHANGELOG.md` entry.
+  compatible" for a git dependency — bump the `ref:` yourself and re-run
+  `flutter pub get`.
+
+Either way, **check [`CHANGELOG.md`](CHANGELOG.md) before bumping** — same
+discipline as bumping the native `gfmc-sdk` coordinate (see "Native SDK
+version" below). Each version here corresponds 1:1 with both a git tag and
+a `CHANGELOG.md` entry.
 
 ### Gradle repository
 

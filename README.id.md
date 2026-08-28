@@ -1,5 +1,7 @@
 # gfmc_flutter
 
+[![pub package](https://img.shields.io/pub/v/gfmc_flutter.svg)](https://pub.dev/packages/gfmc_flutter)
+
 *Read this in other languages: [English](README.md).*
 
 Plugin Flutter pembungkus GfmcSDK — SDK mini-program minicinema. Menanamkan
@@ -21,7 +23,22 @@ native buat tau apa yang berubah di tiap versi sebelum bump versi di sini.
 
 ## Install
 
-Belum dipublish ke pub.dev — tambahkan sebagai git dependency:
+Udah dipublish ke pub.dev — cara biasa:
+
+```yaml
+# pubspec.yaml
+dependencies:
+  gfmc_flutter: ^0.2.0
+```
+
+atau:
+
+```sh
+flutter pub add gfmc_flutter
+```
+
+Mau pin ke git tag persis (misal buat ngikutin `main` pas development,
+atau sengaja lewat pub.dev)? Repo yang sama, tinggal pilih cara:
 
 ```yaml
 # pubspec.yaml
@@ -29,25 +46,26 @@ dependencies:
   gfmc_flutter:
     git:
       url: https://github.com/BDN-ID/gfmc-flutter.git
-      ref: v0.1.0
+      ref: v0.2.0
 ```
 
 ### Versioning package
 
-Package ini ikut semver (`MAJOR.MINOR.PATCH`), tapi didistribusikan lewat
-git tag repo ini, bukan pub.dev — jadi `pubspec.yaml` cuma bisa pin satu
-`ref` pasti, bukan range gaya `^0.1.0`:
+Ikut semver (`MAJOR.MINOR.PATCH`). Di pub.dev, constraint gaya `^0.2.0`
+resolve dan upgrade cara biasa (`flutter pub upgrade`). Kalau pakai `ref:`
+git:
 
-- **Pin ke tag** (`ref: v0.1.0`), jangan `main`/`master` — kalau pakai ref
+- **Pin ke tag** (`ref: v0.2.0`), jangan `main`/`master` — kalau pakai ref
   branch, build-mu diam-diam ambil apa pun yang terbaru di situ, termasuk
   commit work-in-progress yang belum dirilis.
 - **Upgrade manual.** Gak ada `pub upgrade` yang otomatis resolve ke "versi
-  kompatibel terbaru" kayak package pub.dev — ganti `ref:`-nya sendiri terus
+  kompatibel terbaru" buat git dependency — ganti `ref:`-nya sendiri terus
   jalanin ulang `flutter pub get`.
-- **Cek [`CHANGELOG.md`](CHANGELOG.md) sebelum bump** — disiplin yang sama
-  kayak bump koordinat native `gfmc-sdk` (lihat "Versi native SDK" di
-  bawah). Tiap tag di sini berkorespondensi 1:1 dengan satu entry
-  `CHANGELOG.md`.
+
+Kedua cara — **cek [`CHANGELOG.md`](CHANGELOG.md) sebelum bump** — disiplin
+yang sama kayak bump koordinat native `gfmc-sdk` (lihat "Versi native SDK"
+di bawah). Tiap versi di sini berkorespondensi 1:1 sama git tag dan entry
+`CHANGELOG.md`.
 
 ### Repository Gradle
 
