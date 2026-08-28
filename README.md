@@ -239,6 +239,47 @@ underneath a host app:
   is unaffected). What's still unverified: `pod install` + an actual Xcode
   build. Do that and fix up any compile errors before shipping iOS.
 
+## In-app purchase products (SKUs)
+
+The hub's purchase flow (`GfmcSkuSelectedEvent`, `GfmcPurchaseCompletedEvent`
+etc. — see "Events" above) drives Google Play Billing / StoreKit directly.
+Neither store knows about a SKU until a matching in-app product is created
+for it by hand — **this plugin can't do that part**. Before purchases work
+on a given build, create one in-app product per SKU below, using the exact
+string as the product ID (case included), in both:
+
+- **Google Play Console** → your app → Monetize → Products → In-app products
+- **App Store Connect** → your app → Monetize → In-App Purchases
+
+**SKUs (required, must match exactly):**
+
+- `1000p`
+- `1500p`
+- `2000p`
+- `3000p`
+- `4000p`
+- `5000p`
+- `10000p`
+- `100000P` — note the capital `P`, unlike the rest; that's the backend's
+  actual data, not a typo here, and the store-side product ID has to match
+  it exactly.
+
+Everything else about each product — display name, price, discount — is
+set independently per store (Play Console / App Store Connect handle their
+own pricing and localization) and optional to mirror. For reference, the
+backend's own catalog values at the time of writing:
+
+| SKU | Name | Points | Price (IDR) | Discounted price |
+|---|---|---:|---:|---:|
+| `1000p` | 1000 Point | 1,000 | 10,000 | 9,000 (10%) |
+| `1500p` | JKT Point | 1,500 | 15,000 | — |
+| `2000p` | 2000 Point | 2,000 | 19,900 | 9,950 (50%) |
+| `3000p` | 3000 Point | 3,000 | 28,800 | — |
+| `4000p` | 4000 Point | 4,000 | 37,700 | — |
+| `5000p` | 5000 Point | 5,000 | 46,600 | — |
+| `10000p` | 10000 | 10,000 | 100,000 | 80,000 (20%) |
+| `100000P` | 100000 Point | 100,000 | 200,000 | 190,000 (5%) |
+
 ## Repo layout
 
 ```

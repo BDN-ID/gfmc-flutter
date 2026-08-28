@@ -240,6 +240,48 @@ aplikasi host:
   kepengaruh). Yang masih belum diverifikasi: `pod install` + build Xcode
   beneran. Lakuin itu dan perbaiki error compile apa pun sebelum ship iOS.
 
+## Produk in-app purchase (SKU)
+
+Alur pembelian hub (`GfmcSkuSelectedEvent`, `GfmcPurchaseCompletedEvent`,
+dll — lihat "Events" di atas) langsung nge-drive Google Play Billing /
+StoreKit. Kedua store gak bakal kenal SKU sampai produk in-app-nya dibikin
+manual — **ini bagian yang gak bisa dilakuin plugin ini**. Sebelum
+pembelian bisa jalan di suatu build, bikin satu produk in-app per SKU di
+bawah, pakai string persis sebagai product ID (termasuk huruf besar/kecil),
+di kedua tempat:
+
+- **Google Play Console** → app kamu → Monetize → Products → In-app products
+- **App Store Connect** → app kamu → Monetize → In-App Purchases
+
+**SKU (wajib, harus persis sama):**
+
+- `1000p`
+- `1500p`
+- `2000p`
+- `3000p`
+- `4000p`
+- `5000p`
+- `10000p`
+- `100000P` — perhatiin huruf `P` besar, beda dari yang lain; itu emang data
+  asli dari backend, bukan typo di sini, dan product ID di sisi store harus
+  persis sama termasuk huruf besarnya.
+
+Hal lain di tiap produk — nama tampilan, harga, diskon — diatur terpisah
+per store (Play Console / App Store Connect punya harga & lokalisasi
+sendiri-sendiri) dan opsional buat disamain. Buat referensi, nilai katalog
+backend pas ditulis:
+
+| SKU | Nama | Point | Harga (IDR) | Harga diskon |
+|---|---|---:|---:|---:|
+| `1000p` | 1000 Point | 1.000 | 10.000 | 9.000 (10%) |
+| `1500p` | JKT Point | 1.500 | 15.000 | — |
+| `2000p` | 2000 Point | 2.000 | 19.900 | 9.950 (50%) |
+| `3000p` | 3000 Point | 3.000 | 28.800 | — |
+| `4000p` | 4000 Point | 4.000 | 37.700 | — |
+| `5000p` | 5000 Point | 5.000 | 46.600 | — |
+| `10000p` | 10000 | 10.000 | 100.000 | 80.000 (20%) |
+| `100000P` | 100000 Point | 100.000 | 200.000 | 190.000 (5%) |
+
 ## Struktur repo
 
 ```
