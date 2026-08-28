@@ -98,7 +98,7 @@ abstract final class GfmcSdk {
   /// config as long as no hub is currently open.
   static Future<void> init({GfmcConfig config = const GfmcConfig()}) async {
     _ensureWired();
-    await _host.init(
+    await _host.initialize(
       GfmcConfigMessage(
         environment: config.environment.toMessage(),
         locale: config.locale,

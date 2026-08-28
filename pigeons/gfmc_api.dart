@@ -9,11 +9,9 @@
 //   android/src/main/kotlin/com/sltr/gfmc/flutter/Messages.g.kt
 //   ios/Classes/Messages.g.swift
 //
-// NOTE: this repo's committed copies of those three generated files were
-// hand-written to match Pigeon's expected output (no Dart/Flutter SDK was
-// available in the environment that authored them, so `dart run pigeon`
-// was never actually run against this schema). Run the command above and
-// diff before trusting them for anything beyond a starting point.
+// The three generated files are real `dart run pigeon` output (pigeon
+// 22.7.4) — regenerate and diff after any schema change, same as any other
+// generated code.
 import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
@@ -101,11 +99,19 @@ class GfmcVersionMessage {
 abstract class GfmcHostApi {
   /// Must be called once before [open]. Safe to call again to change config
   /// (e.g. switching environment) as long as no hub is currently open.
-  void init(GfmcConfigMessage config);
+  ///
+  /// Named `initialize`, not `init` — `init` is a reserved word in Swift, and
+  /// Pigeon 22.7.4 emits it unescaped (`func init(...)`) in the generated
+  /// `GfmcHostApi` protocol, which fails to compile. Confirmed by actually
+  /// running `dart run pigeon` against this schema (see this repo's
+  /// `Messages.g.swift` header). The public Dart-facing name is unaffected —
+  /// `GfmcSdk.init()` in lib/src/gfmc_sdk.dart just calls `_host.initialize`
+  /// underneath.
+  void initialize(GfmcConfigMessage config);
 
   /// Opens the hub with a minicinema session JWT obtained from your own
-  /// backend — NOT your app's own auth access token. Requires [init] first
-  /// and a token refresher registered on the Dart side (see
+  /// backend — NOT your app's own auth access token. Requires [initialize]
+  /// first and a token refresher registered on the Dart side (see
   /// GfmcFlutterApi.refreshToken) if you expect long sessions.
   void open(String jwt);
 
@@ -115,7 +121,7 @@ abstract class GfmcHostApi {
 
   GfmcVersionMessage getVersion();
 
-  /// Null if [init] hasn't been called yet.
+  /// Null if [initialize] hasn't been called yet.
   GfmcConfigMessage? getConfig();
 }
 

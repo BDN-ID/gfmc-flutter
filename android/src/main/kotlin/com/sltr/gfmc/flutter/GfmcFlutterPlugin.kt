@@ -36,7 +36,8 @@ class GfmcFlutterPlugin : FlutterPlugin, ActivityAware, GfmcHostApi {
     private var activity: Activity? = null
     private var flutterApi: GfmcFlutterApi? = null
 
-    // Non-null once GfmcSDK.init() has actually been called via [init] below.
+    // Non-null once GfmcSDK.init() has actually been called via [initialize]
+    // below.
     // Guards against onSkuSelected/refreshToken/listener callbacks firing
     // into a torn-down engine after detach.
     private var attached = false
@@ -44,8 +45,8 @@ class GfmcFlutterPlugin : FlutterPlugin, ActivityAware, GfmcHostApi {
     // GfmcSDK.getConfig() exists but is `internal` in the AAR (compile-time
     // "Cannot access ... it is internal in 'com.sltr.gfmc.GfmcSDK'" against
     // gfmc-sdk 1.2.6) -- not something a consumer module can call. We track
-    // the last config passed to [init] ourselves instead of reading it back
-    // from the SDK.
+    // the last config passed to [initialize] ourselves instead of reading it
+    // back from the SDK.
     private var lastConfig: GfmcConfigMessage? = null
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -80,9 +81,9 @@ class GfmcFlutterPlugin : FlutterPlugin, ActivityAware, GfmcHostApi {
 
     // -- GfmcHostApi (Dart -> native) ----------------------------------------
 
-    override fun init(config: GfmcConfigMessage) {
+    override fun initialize(config: GfmcConfigMessage) {
         val ctx = activity ?: applicationContext
-            ?: throw IllegalStateException("GfmcFlutterPlugin.init() called before attaching to an engine")
+            ?: throw IllegalStateException("GfmcFlutterPlugin.initialize() called before attaching to an engine")
 
         val sdkConfig = GfmcSDKConfig.Builder()
             .setEnvironment(config.environment.toSdkEnv())

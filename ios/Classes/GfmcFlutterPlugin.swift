@@ -16,15 +16,15 @@ public class GfmcFlutterPlugin: NSObject, FlutterPlugin, GfmcHostApi {
 
   private var flutterApi: GfmcFlutterApi?
 
-  // Non-nil once GfmcHostApi.init() has actually been called via [init]
-  // below. Guards against skuListener/tokenRefresher/delegate callbacks
-  // firing into a torn-down engine after detach.
+  // Non-nil once GfmcHostApi.initialize() has actually been called via
+  // [initialize] below. Guards against skuListener/tokenRefresher/delegate
+  // callbacks firing into a torn-down engine after detach.
   private var attached = false
 
   // Jessica.shared has no public getter for the config it was last
   // configure()'d with (same situation as GfmcSDK.getConfig() being
   // `internal` on Android — see GfmcFlutterPlugin.kt's comment). Track the
-  // last config passed to [init] ourselves instead.
+  // last config passed to [initialize] ourselves instead.
   private var lastConfig: GfmcConfigMessage?
 
   // The hub JessicaSDK.open() handed back, so [closeMiniApp] has something
@@ -50,7 +50,7 @@ public class GfmcFlutterPlugin: NSObject, FlutterPlugin, GfmcHostApi {
   // on iOS *is* the main thread, so MainActor.assumeIsolated is a correct
   // (not a hopeful) escape hatch here, not a data-race risk.
 
-  public func `init`(config: GfmcConfigMessage) throws {
+  public func initialize(config: GfmcConfigMessage) throws {
     MainActor.assumeIsolated {
       let sdkConfig = JessicaSDKConfig(
         environment: config.environment.toSdkEnv(),

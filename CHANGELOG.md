@@ -12,6 +12,15 @@ Adds iOS, wrapping [`gfmc-ios`](https://github.com/BDN-ID/gfmc-ios)
   gaps" for the handful of things that still differ (`closeMiniApp()` is a
   real close on iOS but a no-op on Android; a few iOS-only `JessicaSDKConfig`
   knobs aren't exposed through `GfmcConfig` yet)
+- Ran `dart run pigeon` for real against `pigeons/gfmc_api.dart` for the
+  first time (all three generated files were previously hand-written).
+  Found and fixed a real bug: the `GfmcHostApi.init` method's name collided
+  with Swift's `init` keyword, which Pigeon emits unescaped and fails to
+  compile — renamed to `initialize` internally (`GfmcSdk.init()`, the public
+  Dart API, is unchanged). Android side additionally verified with a real
+  `flutter build apk` against the pinned `gfmc-sdk` artifact. iOS still
+  hasn't been built with an actual Xcode toolchain — see README's "Known
+  gaps".
 
 ## 0.1.0
 

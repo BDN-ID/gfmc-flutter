@@ -209,8 +209,16 @@ class GfmcHostApi {
 
   /// Must be called once before [open]. Safe to call again to change config
   /// (e.g. switching environment) as long as no hub is currently open.
-  Future<void> init(GfmcConfigMessage config) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.gfmc_flutter.GfmcHostApi.init$pigeonVar_messageChannelSuffix';
+  ///
+  /// Named `initialize`, not `init` — `init` is a reserved word in Swift, and
+  /// Pigeon 22.7.4 emits it unescaped (`func init(...)`) in the generated
+  /// `GfmcHostApi` protocol, which fails to compile. Confirmed by actually
+  /// running `dart run pigeon` against this schema (see this repo's
+  /// `Messages.g.swift` header). The public Dart-facing name is unaffected —
+  /// `GfmcSdk.init()` in lib/src/gfmc_sdk.dart just calls `_host.initialize`
+  /// underneath.
+  Future<void> initialize(GfmcConfigMessage config) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.gfmc_flutter.GfmcHostApi.initialize$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -232,8 +240,8 @@ class GfmcHostApi {
   }
 
   /// Opens the hub with a minicinema session JWT obtained from your own
-  /// backend — NOT your app's own auth access token. Requires [init] first
-  /// and a token refresher registered on the Dart side (see
+  /// backend — NOT your app's own auth access token. Requires [initialize]
+  /// first and a token refresher registered on the Dart side (see
   /// GfmcFlutterApi.refreshToken) if you expect long sessions.
   Future<void> open(String jwt) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.gfmc_flutter.GfmcHostApi.open$pigeonVar_messageChannelSuffix';
@@ -308,7 +316,7 @@ class GfmcHostApi {
     }
   }
 
-  /// Null if [init] hasn't been called yet.
+  /// Null if [initialize] hasn't been called yet.
   Future<GfmcConfigMessage?> getConfig() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.gfmc_flutter.GfmcHostApi.getConfig$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(

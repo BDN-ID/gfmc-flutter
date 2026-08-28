@@ -207,12 +207,20 @@ aplikasi host:
   `isWebInspectionEnabled`. Gak ada satu pun yang punya padanan di Android
   hari ini; tambahkan ke `GfmcConfigMessage` di `pigeons/gfmc_api.dart` kalau
   ada aplikasi host yang butuh salah satunya.
-- **`ios/Classes/Messages.g.swift` dan `ios/Classes/GfmcFlutterPlugin.swift`
-  ditulis tangan dan belum pernah dibuild di toolchain Xcode beneran**
-  (gak ada macOS/Xcode di environment yang nulis ini) — catatan yang sama
-  kayak file hasil generate di sisi Android, lihat komentar header
-  `pigeons/gfmc_api.dart`. Jalankan `pod install` + build di Xcode dan
-  perbaiki error compile apa pun sebelum dipakai produksi.
+- **iOS belum pernah dibuild di toolchain Xcode beneran** (gak ada
+  macOS/Xcode di environment mana pun yang megang repo ini sejauh ini).
+  Ketiga file hasil generate (`lib/src/messages.g.dart`,
+  `android/.../Messages.g.kt`, `ios/Classes/Messages.g.swift`) sekarang
+  output asli `dart run pigeon` — sudah dijalankan beneran, bukan ditulis
+  tangan lagi — dan sisi Android sudah dibuild beneran (`flutter build apk`
+  ke artifact Maven `gfmc-sdk` yang di-pin, compile bersih). Jalanin codegen
+  beneran juga nemu bug asli: schema-nya tadinya kasih nama method `init`,
+  yang di Pigeon 22.7.4 di-emit tanpa escape jadi `func init(...)` di
+  protocol Swift hasil generate — `init` itu reserved word di Swift, jadi
+  gagal compile. Sudah diganti nama jadi `initialize` di
+  `pigeons/gfmc_api.dart` (API publik `GfmcSdk.init()` di Dart gak
+  kepengaruh). Yang masih belum diverifikasi: `pod install` + build Xcode
+  beneran. Lakuin itu dan perbaiki error compile apa pun sebelum ship iOS.
 
 ## Struktur repo
 

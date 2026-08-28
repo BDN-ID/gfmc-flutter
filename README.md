@@ -205,12 +205,20 @@ underneath a host app:
   own default, `true`), `hubURLOverride`, `additionalAllowedHosts`,
   `isWebInspectionEnabled`. None have an Android counterpart today; add them
   to `pigeons/gfmc_api.dart`'s `GfmcConfigMessage` if a host app needs one.
-- **iOS's hand-written `ios/Classes/Messages.g.swift` and
-  `ios/Classes/GfmcFlutterPlugin.swift` haven't been built against a real
-  Xcode toolchain** (no macOS/Xcode in the environment that authored them)
-  — same caveat as the Android side's generated file, see
-  `pigeons/gfmc_api.dart`'s header comment. Run `pod install` + build in
-  Xcode and fix up any compile errors before shipping.
+- **iOS hasn't been built against a real Xcode toolchain** (no macOS/Xcode
+  available in any environment that's touched this repo so far). All three
+  generated files (`lib/src/messages.g.dart`,
+  `android/.../Messages.g.kt`, `ios/Classes/Messages.g.swift`) are now real
+  `dart run pigeon` output — confirmed by actually running it, not
+  hand-written — and the Android side has been built for real (`flutter
+  build apk` against the pinned `gfmc-sdk` Maven artifact compiles clean).
+  Running codegen for real also caught a genuine bug: the schema originally
+  named a method `init`, which Pigeon 22.7.4 emits unescaped as `func
+  init(...)` in the generated Swift protocol — `init` is a reserved word in
+  Swift, so that failed to compile. Renamed to `initialize` in
+  `pigeons/gfmc_api.dart` throughout (the public `GfmcSdk.init()` Dart API
+  is unaffected). What's still unverified: `pod install` + an actual Xcode
+  build. Do that and fix up any compile errors before shipping iOS.
 
 ## Repo layout
 

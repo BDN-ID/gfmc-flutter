@@ -241,12 +241,20 @@ interface GfmcHostApi {
   /**
    * Must be called once before [open]. Safe to call again to change config
    * (e.g. switching environment) as long as no hub is currently open.
+   *
+   * Named `initialize`, not `init` — `init` is a reserved word in Swift, and
+   * Pigeon 22.7.4 emits it unescaped (`func init(...)`) in the generated
+   * `GfmcHostApi` protocol, which fails to compile. Confirmed by actually
+   * running `dart run pigeon` against this schema (see this repo's
+   * `Messages.g.swift` header). The public Dart-facing name is unaffected —
+   * `GfmcSdk.init()` in lib/src/gfmc_sdk.dart just calls `_host.initialize`
+   * underneath.
    */
-  fun init(config: GfmcConfigMessage)
+  fun initialize(config: GfmcConfigMessage)
   /**
    * Opens the hub with a minicinema session JWT obtained from your own
-   * backend — NOT your app's own auth access token. Requires [init] first
-   * and a token refresher registered on the Dart side (see
+   * backend — NOT your app's own auth access token. Requires [initialize]
+   * first and a token refresher registered on the Dart side (see
    * GfmcFlutterApi.refreshToken) if you expect long sessions.
    */
   fun open(jwt: String)
@@ -256,7 +264,7 @@ interface GfmcHostApi {
    */
   fun closeMiniApp()
   fun getVersion(): GfmcVersionMessage
-  /** Null if [init] hasn't been called yet. */
+  /** Null if [initialize] hasn't been called yet. */
   fun getConfig(): GfmcConfigMessage?
 
   companion object {
@@ -269,13 +277,13 @@ interface GfmcHostApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: GfmcHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.gfmc_flutter.GfmcHostApi.init$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.gfmc_flutter.GfmcHostApi.initialize$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val configArg = args[0] as GfmcConfigMessage
             val wrapped: List<Any?> = try {
-              api.init(configArg)
+              api.initialize(configArg)
               listOf(null)
             } catch (exception: Throwable) {
               wrapError(exception)
