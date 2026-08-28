@@ -22,8 +22,10 @@ class HubDemoPage extends StatefulWidget {
 }
 
 class _HubDemoPageState extends State<HubDemoPage> {
-  final _usernameCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
+  // Prefilled with jessica-dummy-api's test account -- this is a throwaway
+  // sandbox backend (see dummy_auth_api.dart), not a real user's login.
+  final _usernameCtrl = TextEditingController(text: 'zaki@bdn.id');
+  final _passwordCtrl = TextEditingController(text: 'TechBdn123!');
 
   String _status = 'not logged in';
   final List<String> _log = [];
