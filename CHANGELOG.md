@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.2
+
+Docs-only patch — no plugin code changes.
+
+- README.md/README.id.md: new "In-app purchase products (SKUs)" section —
+  the exact SKU strings that must be created as matching in-app products in
+  Google Play Console and App Store Connect before purchases work. SKUs are
+  called out as the required part; name/price/discount are the backend
+  catalog's own reference values, explicitly optional to mirror since each
+  store sets its own pricing/localization independently.
+
 ## 0.2.1
 
 Docs-only patch — no plugin code changes.
